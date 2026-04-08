@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "seed:more": "node scripts/seed-more.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -327,6 +327,116 @@ body {
   border-color: var(--orange);
 }
 
+.maps-cta-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(232, 101, 45, 0.1), rgba(26, 26, 46, 0.08));
+  border: 1px solid rgba(232, 101, 45, 0.25);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.maps-cta-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.maps-cta-text {
+  font-size: 0.75rem;
+  color: var(--dark-soft);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.maps-location-btn {
+  border: none;
+  border-radius: 10px;
+  background: var(--dark);
+  color: var(--white);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  width: fit-content;
+}
+
+.maps-location-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.maps-location-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.maps-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.maps-card {
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--white);
+}
+
+.maps-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.maps-card-top h3 {
+  font-size: 0.86rem;
+  color: var(--dark);
+}
+
+.maps-rating {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.maps-rating.muted {
+  color: var(--gray);
+}
+
+.maps-address {
+  margin-top: 6px;
+  font-size: 0.74rem;
+  color: var(--gray);
+}
+
+.maps-meta-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  font-size: 0.68rem;
+  color: var(--dark-soft);
+}
+
+.maps-open-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.74rem;
+  color: var(--orange);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.maps-open-link:hover {
+  text-decoration: underline;
+}
+
 /* ===== RESULT CARDS ===== */
 .result-list {
   display: flex;
@@ -857,6 +967,17 @@ body {
     font-size: 0.9rem;
   }
 
+  .maps-cta-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .maps-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .stats-row {
     gap: 14px;
   }
@@ -1005,6 +1126,11 @@ body {
   .result-list {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
+  }
+
+  .maps-list {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
   }
 
   .step-list {
