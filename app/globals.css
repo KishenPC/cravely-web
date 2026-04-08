@@ -29,6 +29,11 @@ html {
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   background-color: var(--cream);
+  background-image:
+    radial-gradient(circle, rgba(244, 162, 97, 0.28) 1.5px, transparent 1.6px),
+    radial-gradient(circle, rgba(244, 162, 97, 0.18) 1.2px, transparent 1.3px);
+  background-size: 24px 24px, 24px 24px;
+  background-position: 0 0, 12px 12px;
   color: var(--dark);
   min-height: 100vh;
   display: flex;
@@ -556,6 +561,12 @@ body {
   color: var(--gray);
 }
 
+.review-subtitle {
+  font-size: 0.68rem;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
 .review-stars {
   color: var(--gold);
   font-size: 0.8rem;
@@ -605,6 +616,75 @@ body {
 
 .review-action-btn:hover {
   color: var(--orange);
+}
+
+.review-form-card {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.review-mode-toggle {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(232, 101, 45, 0.16);
+  border-radius: 14px;
+}
+
+.review-mode-btn {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--gray);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  font-family: inherit;
+}
+
+.review-mode-btn:hover {
+  color: var(--dark);
+}
+
+.review-mode-btn.active {
+  background: var(--dark);
+  color: var(--white);
+}
+
+.review-mode-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.review-inline-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.review-form-hint {
+  font-size: 0.72rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+.review-filter-card {
+  margin-bottom: 16px;
+}
+
+.review-filter-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--gray);
 }
 
 /* ===== PROFILE PAGE ===== */
@@ -783,6 +863,25 @@ body {
   margin-bottom: 10px;
 }
 
+.offer-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.offer-points-cost {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--orange);
+}
+
+.offer-remaining {
+  font-size: 0.68rem;
+  color: var(--gray);
+}
+
 .offer-footer {
   display: flex;
   justify-content: space-between;
@@ -812,6 +911,38 @@ body {
 
 .offer-claim-btn:hover {
   opacity: 0.85;
+}
+
+.offer-claim-btn:disabled {
+  background: var(--gray-light);
+  color: var(--gray);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.offer-points-strip {
+  background: var(--dark);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.offer-points-strip .points-label {
+  margin-bottom: 2px;
+}
+
+.offer-points-strip .points-value {
+  font-size: 1.4rem;
+}
+
+.offer-points-strip .points-sub {
+  max-width: 240px;
+  text-align: right;
 }
 
 /* ===== OFFERS GRID ===== */
@@ -975,6 +1106,10 @@ body {
   }
 
   .maps-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .review-inline-fields {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1341,6 +1476,31 @@ body {
 }
 
 .auth-field input:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(232, 101, 45, 0.1);
+}
+
+.auth-field select,
+.auth-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--gray-light);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  color: var(--dark);
+  background: var(--white);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  font-family: inherit;
+}
+
+.auth-field textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.auth-field select:focus,
+.auth-field textarea:focus {
   border-color: var(--orange);
   box-shadow: 0 0 0 3px rgba(232, 101, 45, 0.1);
 }

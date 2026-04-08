@@ -33,6 +33,11 @@ export default async function handler(req, res) {
         canAfford: user.points >= r.pointsCost,
       }));
 
+      const totalPointsEarned = typeof user.totalPointsEarned === 'number'
+        ? user.totalPointsEarned
+        : user.totalReviews * 2 + user.totalUpvotes * 2;
+      const totalPointsSpent = typeof user.totalPointsSpent === 'number' ? user.totalPointsSpent : 0;
+
       return res.status(200).json({
         name: user.name,
         email: user.email,
@@ -40,6 +45,8 @@ export default async function handler(req, res) {
         image: user.image || null,
         provider: user.provider || 'credentials',
         points: user.points,
+        pointsEarned: totalPointsEarned,
+        pointsSpent: totalPointsSpent,
         reviews: user.totalReviews,
         upvotes: user.totalUpvotes,
         photos: user.totalPhotos,

@@ -61,7 +61,7 @@ export default function ProfilePage() {
       <div className="points-card">
         <div className="points-label">Cravely Points</div>
         <div className="points-value">{profile.points}</div>
-        <div className="points-sub">Earn more by writing reviews</div>
+        <div className="points-sub">Earn from reviews, spend on offers and rewards</div>
       </div>
 
       <div className="stats-row">

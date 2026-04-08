@@ -1,3 +1,6 @@
+import dbConnect from '../../lib/db'
+import { Restaurant } from '../../lib/schemas'
+
 const MAPS_API_KEY =
   process.env.PLACES_URI ||
   process.env.MAPS_URI ||
@@ -48,9 +51,53 @@ export default async function handler(req, res) {
       location: place.geometry?.location || null,
     }))
 
+    await dbConnect()
+
+    const syncResults = await Promise.allSettled(
+      places
+        .filter((place) => place.location?.lng != null && place.location?.lat != null)
+        .map(async (place) => {
+          const filter = place.id
+            ? { googlePlaceId: place.id }
+            : { name: place.name, address: place.address }
+
+          return Restaurant.findOneAndUpdate(
+            filter,
+            {
+              $set: {
+                name: place.name,
+                googlePlaceId: place.id,
+                address: place.address,
+                location: {
+                  type: 'Point',
+                  coordinates: [place.location.lng, place.location.lat],
+                },
+                rating: place.rating,
+                totalRatings: place.totalRatings,
+                openNow: place.openNow,
+                mapsUrl: place.mapsUrl,
+                source: 'google-maps',
+                lastSyncedAt: new Date(),
+              },
+              $setOnInsert: {
+                createdAt: new Date(),
+              },
+            },
+            {
+              upsert: true,
+              new: true,
+              setDefaultsOnInsert: true,
+            }
+          )
+        })
+    )
+
+    const syncedCount = syncResults.filter((r) => r.status === 'fulfilled').length
+
     return res.status(200).json({
       places,
       status: payload.status,
+      syncedCount,
     })
   } catch (error) {
     return res.status(500).json({ error: error.message || 'Failed to fetch nearby restaurants' })

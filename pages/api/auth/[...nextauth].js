@@ -11,6 +11,7 @@ export const authOptions = {
       authorization: {
         params: {
           prompt: "select_account",
+          hd: "vitstudent.ac.in",
         },
       },
     }),
@@ -27,17 +28,25 @@ export const authOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account }) {
-      // When signing in with Google, create or update the user in DB
+    async signIn({ user, account, profile }) {
+      // Restrict Google auth to VIT student email addresses only.
       if (account.provider === "google") {
+        const email = (user?.email || "").toLowerCase().trim();
+        const hostedDomain = (profile?.hd || "").toLowerCase();
+        const emailVerified = profile?.email_verified === true;
+
+        if (!emailVerified || hostedDomain !== "vitstudent.ac.in" || !email.endsWith("@vitstudent.ac.in")) {
+          return false;
+        }
+
         try {
           await dbConnect();
-          const existingUser = await User.findOne({ email: user.email.toLowerCase() });
+          const existingUser = await User.findOne({ email });
 
           if (!existingUser) {
             await User.create({
               name: user.name,
-              email: user.email.toLowerCase(),
+              email,
               image: user.image,
               provider: "google",
               college: "",
