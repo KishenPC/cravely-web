@@ -1,9 +1,20 @@
 'use client'
+import { usePathname ,useRouter } from 'next/navigation'
+// const tabs = [
+//   { id: 'home', label: 'Home', path: '/' },
+//   { id: 'search', label: 'Search', path: '/search' },
+//   { id: 'reviews', label: 'Reviews', path: '/reviews' },
+//   { id: 'offers', label: 'Offers', path: '/offers' },
+//   { id: 'profile', label: 'Profile', path: '/profile' },
+// ]
 
 export default function HomePage() {
+  const router = useRouter();
+  const handleRouting = function(path){
+    router.push(path);
+  }
   return (
     <div className="page-content" key="home">
-      <div className="section-label">Welcome to Cravely</div>
       <h2 className="section-title">
         Find the best dishes near your college.
       </h2>
@@ -16,9 +27,9 @@ export default function HomePage() {
 
       <div className="section-label">What You Can Do</div>
       <div className="feature-list">
-        <div className="feature-card">
+        <div className="feature-card" onClick={() => handleRouting("/search")}>
           <div className="feature-icon search">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="gold" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
@@ -29,9 +40,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="feature-card">
+        <div className="feature-card" onClick={() => handleRouting("/reviews")}>
           <div className="feature-icon review">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="gold" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
           </div>
@@ -41,9 +52,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="feature-card">
+        <div className="feature-card" onClick={() => handleRouting("/offers")}>
           <div className="feature-icon offer">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="gold" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
               <line x1="7" y1="7" x2="7.01" y2="7"/>
             </svg>
@@ -54,17 +65,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="feature-card">
+        <div className="feature-card" onClick={() => handleRouting("/profile")}>
           <div className="feature-icon points">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="gold" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <path d="M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8"/>
               <path d="M12 18V6"/>
             </svg>
           </div>
           <div>
-            <h3>Earn Points</h3>
-            <p>Write reviews, upload photos, get upvotes. Redeem for discounts.</p>
+            <h3>Profile</h3>
+            <p>Check your profile, points, your reviews</p>
           </div>
         </div>
       </div>

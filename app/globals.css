@@ -27,8 +27,9 @@ html {
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: var(--cream);
+  font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  background-image:url("/CravelBackground.png");
+  background-size: cover;
   color: var(--dark);
   min-height: 100vh;
   display: flex;
@@ -41,41 +42,41 @@ body {
 .menu-card {
   width: 100%;
   max-width: 900px;
-  min-height: 85vh;
-  background: var(--white);
-  border-radius: 24px;
+  min-height: 90vh;
+  background:linear-gradient(#808080,#2E2E2E);
+  border-radius: 10px;
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.04);
+    -10px 10px 24px rgb(0, 0, 0);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid white;
 }
 
 /* ===== HEADER ===== */
 .menu-header {
-  background: var(--dark);
+  background: transparent;
   padding: 24px 24px 20px;
   text-align: center;
   position: relative;
 }
 
 .menu-header h1 {
-  font-size: 1.6rem;
+  font-size:small;
   font-weight: 700;
   color: var(--white);
   letter-spacing: -0.5px;
 }
 
-.menu-header h1 span {
+/* .menu-header h1 span {
   color: var(--orange);
-}
+} */
 
 .menu-header p {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.789);
   margin-top: 4px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -194,21 +195,21 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--orange);
+  color: gold;
   margin-bottom: 12px;
 }
 
 .section-title {
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--dark);
+  color: gold;
   line-height: 1.3;
   margin-bottom: 8px;
 }
 
 .section-desc {
   font-size: 0.85rem;
-  color: var(--gray);
+  color: var(--cream);
   line-height: 1.6;
   margin-bottom: 24px;
 }
@@ -225,7 +226,7 @@ body {
   align-items: flex-start;
   gap: 14px;
   padding: 16px;
-  background: var(--cream);
+  background: transparent;
   border-radius: var(--radius);
   transition: transform 0.2s ease;
 }
@@ -235,6 +236,8 @@ body {
 }
 
 .feature-icon {
+  background-color: transparent;
+  border: 1px dashed white;
   width: 40px;
   height: 40px;
   min-width: 40px;
@@ -244,23 +247,24 @@ body {
   justify-content: center;
   font-size: 1.1rem;
   color: var(--white);
+  transition: border,.2s;
+  
+}
+.feature-card:hover .feature-icon{
+  border: 1px dashed gold;
 }
 
-.feature-icon.search { background: var(--orange); }
-.feature-icon.review { background: var(--gold); }
-.feature-icon.offer { background: var(--green); }
-.feature-icon.points { background: var(--dark-soft); }
 
 .feature-card h3 {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--dark);
+  color: gold;
   margin-bottom: 2px;
 }
 
 .feature-card p {
   font-size: 0.75rem;
-  color: var(--gray);
+  color: var(--white);
   line-height: 1.5;
 }
 
@@ -388,7 +392,7 @@ body {
 }
 
 .result-meta .star {
-  color: var(--gold);
+  color: gold;
 }
 
 .offer-badge {
@@ -447,7 +451,7 @@ body {
 }
 
 .review-stars {
-  color: var(--gold);
+  color: gold;
   font-size: 0.8rem;
   letter-spacing: 1px;
 }
@@ -728,10 +732,10 @@ body {
 
 /* ===== DIVIDER ===== */
 .divider {
-  width: 40px;
-  height: 3px;
-  background: var(--orange);
-  border-radius: 2px;
+  width: 100%;
+  height: 1px;
+  background: gold;
+  border-radius: 1px;
   margin: 20px 0;
 }
 
@@ -753,25 +757,25 @@ body {
   height: 28px;
   min-width: 28px;
   border-radius: 50%;
-  background: var(--cream);
-  border: 1.5px solid var(--orange);
+  background: transparent;
+  border: 1.5px dashed white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--orange);
+  color: gold;
 }
 
 .step-item h4 {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--dark);
+  color: gold;
 }
 
 .step-item p {
   font-size: 0.72rem;
-  color: var(--gray);
+  color: white;
   margin-top: 1px;
 }
 
@@ -779,12 +783,12 @@ body {
 .menu-footer {
   text-align: center;
   padding: 16px 20px;
-  border-top: 1px solid var(--gray-light);
+  border-top: 1px solid white
 }
 
 .menu-footer p {
   font-size: 0.65rem;
-  color: var(--gray);
+  color: var(--white);
   letter-spacing: 0.5px;
 }
 
@@ -792,7 +796,7 @@ body {
 .wip-badge {
   display: inline-block;
   background: rgba(245, 158, 11, 0.12);
-  color: var(--gold);
+  color: gold;
   font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
