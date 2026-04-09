@@ -189,14 +189,14 @@ export default function SearchPage() {
       <div className="section-label">Search</div>
       <h2 className="section-title">What are you craving?</h2>
       <p className="section-desc">
-        Use Dish Search to filter dishes. Use Restaurant Search in the nearby restaurants section to filter restaurant cards.
+        Search dishes and nearby restaurants.
       </p>
 
       <div className="maps-cta-card">
         <div>
           <div className="maps-cta-title">Load Nearby Restaurants</div>
           <p className="maps-cta-text">
-            Uses Google Maps + your location to fetch nearby restaurants and the dishes available from them.
+            Fetches nearby restaurants and their dishes using your location.
           </p>
         </div>
         <button
@@ -229,9 +229,6 @@ export default function SearchPage() {
                   value={restaurantSearchTerm}
                   onChange={(event) => setRestaurantSearchTerm(event.target.value)}
                 />
-              </div>
-              <div className="review-form-hint">
-                Searches by restaurant name and address. Use filters below for distance, rating, and open status.
               </div>
             </div>
 
@@ -362,9 +359,6 @@ export default function SearchPage() {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </div>
-        <div className="review-form-hint">
-          Searches dish name, restaurant name, and category within nearby restaurants.
-        </div>
       </div>
 
       <div className="section-label">
@@ -401,9 +395,6 @@ export default function SearchPage() {
         )}
       </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <span className="wip-badge">Additional dish filters coming soon</span>
-      </div>
     </div>
   )
 }
