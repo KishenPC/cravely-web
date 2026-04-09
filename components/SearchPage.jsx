@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocationScope } from './LocationScopeProvider'
 
-const RESTAURANTS_PAGE_SIZE = 12
+const RESTAURANTS_PAGE_SIZE = 6
 
 const DISTANCE_FILTERS = [
   { id: 'all', label: 'Any Distance' },
@@ -71,11 +71,11 @@ export default function SearchPage() {
   }, [nearbyRestaurants, nearbyPlaces])
 
   const filters = [
-    { id: 'all', label: 'All' },
-    { id: 'under100', label: 'Under \u20B9100' },
-    { id: 'toprated', label: 'Top Rated' },
-    { id: 'nearby', label: 'Nearby' },
-    { id: 'offers', label: 'With Offers' },
+    { id: 'all', label: 'All Dishes' },
+    { id: 'under100', label: 'Budget (<= \u20B9100)' },
+    { id: 'toprated', label: 'High Rating (>= 4.2)' },
+    { id: 'nearby', label: 'Distance Available' },
+    { id: 'offers', label: 'Has Offer' },
   ]
 
   const filteredResults = useMemo(() => {
@@ -189,14 +189,14 @@ export default function SearchPage() {
       <div className="section-label">Search</div>
       <h2 className="section-title">What are you craving?</h2>
       <p className="section-desc">
-        Search any dish and compare prices, ratings, and distance across restaurants near you.
+        Use Dish Search to filter dishes. Use Restaurant Search in the nearby restaurants section to filter restaurant cards.
       </p>
 
       <div className="maps-cta-card">
         <div>
-          <div className="maps-cta-title">Find restaurants around me</div>
+          <div className="maps-cta-title">Load Nearby Restaurants</div>
           <p className="maps-cta-text">
-            Powered by Google Maps Places API. Tap once to discover what is open near your current location.
+            Uses Google Maps + your location to fetch nearby restaurants and the dishes available from them.
           </p>
         </div>
         <button
@@ -213,10 +213,10 @@ export default function SearchPage() {
 
       {hasLocation && (
         <>
-          <div className="section-label">Nearby via Google Maps</div>
+          <div className="section-label">Nearby Restaurants</div>
           <div className="review-form-card search-restaurant-panel">
             <div className="auth-field">
-              <label htmlFor="restaurantSearchInput">Restaurant Search</label>
+              <label htmlFor="restaurantSearchInput">Search Nearby Restaurants</label>
               <div className="search-box search-box-compact search-box-infield">
                 <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/>
@@ -225,16 +225,19 @@ export default function SearchPage() {
                 <input
                   id="restaurantSearchInput"
                   type="text"
-                  placeholder='Try "dominos", "campus", "canteen"...'
+                  placeholder='Try "Dominos", "food court", "canteen"...'
                   value={restaurantSearchTerm}
                   onChange={(event) => setRestaurantSearchTerm(event.target.value)}
                 />
+              </div>
+              <div className="review-form-hint">
+                Searches by restaurant name and address. Use filters below for distance, rating, and open status.
               </div>
             </div>
 
             <div className="restaurant-filters-grid">
               <div className="auth-field">
-                <label htmlFor="distanceFilter">Distance</label>
+                <label htmlFor="distanceFilter">Distance from You</label>
                 <select
                   id="distanceFilter"
                   value={distanceFilter}
@@ -247,7 +250,7 @@ export default function SearchPage() {
               </div>
 
               <div className="auth-field">
-                <label htmlFor="ratingFilter">Rating</label>
+                <label htmlFor="ratingFilter">Minimum Rating</label>
                 <select
                   id="ratingFilter"
                   value={ratingFilter}
@@ -260,7 +263,7 @@ export default function SearchPage() {
               </div>
 
               <div className="auth-field">
-                <label htmlFor="openFilter">Status</label>
+                <label htmlFor="openFilter">Open Status</label>
                 <select
                   id="openFilter"
                   value={openFilter}
@@ -283,7 +286,7 @@ export default function SearchPage() {
             </div>
 
             {filteredRestaurants.length === 0 ? (
-              <div>No nearby restaurants match your filters.</div>
+              <div>No nearby restaurants match these filters. Clear filters or refresh your location.</div>
             ) : (
               <>
                 <div className="maps-list">
@@ -323,7 +326,7 @@ export default function SearchPage() {
                     type="button"
                     onClick={() => setVisibleRestaurantCount((count) => count + RESTAURANTS_PAGE_SIZE)}
                   >
-                    Show More Restaurants
+                    Show {RESTAURANTS_PAGE_SIZE} More Restaurants
                   </button>
                 )}
               </>
@@ -345,7 +348,7 @@ export default function SearchPage() {
       </div>
 
       <div className="auth-field dish-search-field">
-        <label htmlFor="dishSearchInput">Dish Search</label>
+        <label htmlFor="dishSearchInput">Search Dishes</label>
         <div className="search-box search-box-compact search-box-infield">
           <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"/>
@@ -359,19 +362,22 @@ export default function SearchPage() {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </div>
+        <div className="review-form-hint">
+          Searches dish name, restaurant name, and category within nearby restaurants.
+        </div>
       </div>
 
       <div className="section-label">
-        {searchTerm.trim() ? `Results for "${searchTerm.trim()}"` : 'All Results'}
+        {searchTerm.trim() ? `Dish Results for "${searchTerm.trim()}"` : 'Dish Results (Nearby Only)'}
       </div>
       <div className="result-list">
         {filteredResults.length === 0 ? (
           <div>
             {!hasLocation
-              ? 'Use My Location to see dishes available near your campus.'
+              ? 'Use My Location first to load nearby restaurants and dishes.'
               : searchTerm.trim()
-                ? 'No nearby dishes matched your search.'
-                : 'No dishes available in nearby mapped restaurants right now.'}
+                ? 'No nearby dishes matched this search. Try another keyword.'
+                : 'No dishes found for your nearby restaurants yet.'}
           </div>
         ) : (
           filteredResults.map((result, index) => (
@@ -396,7 +402,7 @@ export default function SearchPage() {
       </div>
 
       <div style={{ marginTop: '20px' }}>
-        <span className="wip-badge">More dish filters coming soon</span>
+        <span className="wip-badge">Additional dish filters coming soon</span>
       </div>
     </div>
   )
