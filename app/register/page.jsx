@@ -165,7 +165,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="login-footer">
-          <p>CRAVELY &middot; A College Project &middot; Work in Progress</p>
+          <p>CRAVELY &middot; A College Project &middot;</p>
         </div>
       </div>
     </div>

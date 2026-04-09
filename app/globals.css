@@ -442,6 +442,60 @@ body {
   text-decoration: underline;
 }
 
+.search-restaurant-panel {
+  margin-bottom: 18px;
+}
+
+.search-box-compact {
+  margin-bottom: 12px;
+}
+
+.search-box-infield {
+  margin-bottom: 0;
+}
+
+.dish-search-field {
+  margin-bottom: 14px;
+}
+
+.restaurant-filters-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.restaurant-list-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--gray);
+  margin-bottom: 12px;
+}
+
+.show-more-btn {
+  width: 100%;
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  font-family: inherit;
+}
+
+.show-more-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  transform: translateY(-1px);
+}
+
 /* ===== RESULT CARDS ===== */
 .result-list {
   display: flex;
@@ -1111,6 +1165,10 @@ body {
 
   .review-inline-fields {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .restaurant-filters-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .stats-row {

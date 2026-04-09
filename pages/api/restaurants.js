@@ -1,5 +1,11 @@
 import dbConnect from '../../lib/db';
-import { Restaurant } from '../../lib/schemas';
+import {
+  getAllRestaurants,
+  getLocationContext,
+  getRestaurantsByPlaceIds,
+  toRestaurantResponse,
+} from '../../lib/location/service';
+import { parseLocationQuery, parsePlaceIds } from '../../lib/location/shared';
 
 export default async function handler(req, res) {
   try {
@@ -10,18 +16,22 @@ export default async function handler(req, res) {
       return;
     }
 
-    const restaurants = await Restaurant.find({})
-      .sort({ name: 1 })
-      .select('name address')
-      .lean();
+    const placeIds = parsePlaceIds(req.query?.placeIds);
+    if (placeIds.length > 0) {
+      const restaurants = await getRestaurantsByPlaceIds(placeIds);
+      res.status(200).json(restaurants.map((restaurant) => toRestaurantResponse(restaurant)));
+      return;
+    }
 
-    res.status(200).json(
-      restaurants.map((restaurant) => ({
-        _id: String(restaurant._id),
-        name: restaurant.name || 'Unknown Restaurant',
-        address: restaurant.address || '',
-      }))
-    );
+    const { hasLocation, location } = parseLocationQuery(req.query || {});
+    if (hasLocation) {
+      const context = await getLocationContext(location);
+      res.status(200).json(context.restaurants);
+      return;
+    }
+
+    const restaurants = await getAllRestaurants();
+    res.status(200).json(restaurants);
   } catch (error) {
     console.error('API /restaurants error:', error);
     res.status(500).json({ error: error.message || 'Internal Server Error' });

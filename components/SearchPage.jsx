@@ -1,33 +1,74 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useLocationScope } from './LocationScopeProvider'
+
+const RESTAURANTS_PAGE_SIZE = 12
+
+const DISTANCE_FILTERS = [
+  { id: 'all', label: 'Any Distance' },
+  { id: 'within1km', label: 'Within 1 km', maxMeters: 1000 },
+  { id: 'within2km', label: 'Within 2 km', maxMeters: 2000 },
+  { id: 'within5km', label: 'Within 5 km', maxMeters: 5000 },
+]
+
+const RATING_FILTERS = [
+  { id: 'all', label: 'Any Rating', minRating: null },
+  { id: 'rating35', label: '3.5 and above', minRating: 3.5 },
+  { id: 'rating40', label: '4.0 and above', minRating: 4.0 },
+  { id: 'rating45', label: '4.5 and above', minRating: 4.5 },
+]
+
+function buildRestaurantFallbackFromPlaces(places) {
+  return (Array.isArray(places) ? places : []).map((place) => ({
+    _id: place.id ? `place:${place.id}` : place.name,
+    googlePlaceId: place.id || '',
+    name: place.name || 'Unknown Restaurant',
+    address: place.address || '',
+    distance: '\u2014',
+    distanceMeters: null,
+    openNow: typeof place.openNow === 'boolean' ? place.openNow : null,
+    rating: Number.isFinite(Number(place.rating)) ? Number(place.rating) : null,
+    totalRatings: Number.isFinite(Number(place.totalRatings)) ? Number(place.totalRatings) : 0,
+    mapsUrl: place.mapsUrl || '',
+  }))
+}
+
+function formatOpenStatus(openNow) {
+  if (openNow === true) return 'Open now'
+  if (openNow === false) return 'Closed now'
+  return 'Hours unavailable'
+}
 
 export default function SearchPage() {
-
   const [activeFilter, setActiveFilter] = useState('all')
-  const [results, setResults] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [nearbyPlaces, setNearbyPlaces] = useState([])
-  const [mapLoading, setMapLoading] = useState(false)
-  const [mapError, setMapError] = useState('')
+  const [restaurantSearchTerm, setRestaurantSearchTerm] = useState('')
+  const [distanceFilter, setDistanceFilter] = useState('all')
+  const [ratingFilter, setRatingFilter] = useState('all')
+  const [openFilter, setOpenFilter] = useState('all')
+  const [visibleRestaurantCount, setVisibleRestaurantCount] = useState(RESTAURANTS_PAGE_SIZE)
 
-  useEffect(() => {
-    async function fetchResults() {
-      try {
-        const res = await fetch('/api/search-results')
-        if (!res.ok) throw new Error('Failed to fetch results')
-        const data = await res.json()
-        setResults(data)
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
+  const {
+    hydrated,
+    hasLocation,
+    data,
+    loadingContext,
+    locating,
+    error: locationError,
+    requestLocationAndRefresh,
+  } = useLocationScope()
+
+  const nearbyRestaurants = data?.restaurants || []
+  const nearbyPlaces = data?.places || []
+  const results = data?.dishes || []
+
+  const restaurantCatalog = useMemo(() => {
+    if (nearbyRestaurants.length > 0) {
+      return nearbyRestaurants
     }
-    fetchResults()
-  }, [])
+    return buildRestaurantFallbackFromPlaces(nearbyPlaces)
+  }, [nearbyRestaurants, nearbyPlaces])
 
   const filters = [
     { id: 'all', label: 'All' },
@@ -53,9 +94,7 @@ export default function SearchPage() {
         restaurant.includes(normalizedSearch) ||
         category.includes(normalizedSearch)
 
-      if (!matchesSearch) {
-        return false
-      }
+      if (!matchesSearch) return false
 
       if (activeFilter === 'under100') {
         return Number.isFinite(numericPrice) && numericPrice <= 100
@@ -77,53 +116,73 @@ export default function SearchPage() {
     })
   }, [results, searchTerm, activeFilter])
 
-  async function fetchNearbyByLocation() {
-    setMapError('')
+  const filteredRestaurants = useMemo(() => {
+    const normalizedSearch = restaurantSearchTerm.trim().toLowerCase()
+    const selectedDistance = DISTANCE_FILTERS.find((filter) => filter.id === distanceFilter)
+    const selectedRating = RATING_FILTERS.find((filter) => filter.id === ratingFilter)
 
-    if (!navigator.geolocation) {
-      setMapError('Geolocation is not supported in your browser.')
-      return
-    }
+    return restaurantCatalog.filter((restaurant) => {
+      const restaurantName = String(restaurant.name || '').toLowerCase()
+      const restaurantAddress = String(restaurant.address || '').toLowerCase()
+      const numericDistance = Number(restaurant.distanceMeters)
+      const numericRating = Number(restaurant.rating)
 
-    setMapLoading(true)
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        restaurantName.includes(normalizedSearch) ||
+        restaurantAddress.includes(normalizedSearch)
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const params = new URLSearchParams({
-            lat: position.coords.latitude.toString(),
-            lng: position.coords.longitude.toString(),
-            radius: '2000',
-          })
+      if (!matchesSearch) return false
 
-          const res = await fetch(`/api/maps-nearby?${params.toString()}`)
-          const data = await res.json()
-
-          if (!res.ok) {
-            throw new Error(data.error || 'Unable to fetch nearby restaurants')
-          }
-
-          setNearbyPlaces(data.places || [])
-        } catch (err) {
-          setMapError(err.message || 'Unable to fetch nearby restaurants')
-        } finally {
-          setMapLoading(false)
+      if (selectedDistance?.maxMeters != null) {
+        if (!Number.isFinite(numericDistance) || numericDistance > selectedDistance.maxMeters) {
+          return false
         }
-      },
-      (geoError) => {
-        if (geoError.code === 1) {
-          setMapError('Location permission denied. Enable location access to use this feature.')
-        } else {
-          setMapError('Could not get your location. Please try again.')
+      }
+
+      if (selectedRating?.minRating != null) {
+        if (!Number.isFinite(numericRating) || numericRating < selectedRating.minRating) {
+          return false
         }
-        setMapLoading(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+      }
+
+      if (openFilter === 'open') {
+        return restaurant.openNow === true
+      }
+
+      if (openFilter === 'closed') {
+        return restaurant.openNow === false
+      }
+
+      return true
+    })
+  }, [restaurantCatalog, restaurantSearchTerm, distanceFilter, ratingFilter, openFilter])
+
+  const visibleRestaurants = useMemo(
+    () => filteredRestaurants.slice(0, visibleRestaurantCount),
+    [filteredRestaurants, visibleRestaurantCount]
+  )
+  const hasMoreRestaurants = visibleRestaurantCount < filteredRestaurants.length
+
+  useEffect(() => {
+    setVisibleRestaurantCount(RESTAURANTS_PAGE_SIZE)
+  }, [restaurantSearchTerm, distanceFilter, ratingFilter, openFilter, restaurantCatalog.length])
+
+  const hasRestaurantFilters =
+    restaurantSearchTerm.trim().length > 0 ||
+    distanceFilter !== 'all' ||
+    ratingFilter !== 'all' ||
+    openFilter !== 'all'
+
+  function clearRestaurantFilters() {
+    setRestaurantSearchTerm('')
+    setDistanceFilter('all')
+    setRatingFilter('all')
+    setOpenFilter('all')
   }
 
+  const loading = !hydrated || loadingContext
   if (loading) return <div className="page-content">Loading results...</div>
-  if (error) return <div className="page-content">Error: {error}</div>
 
   return (
     <div className="page-content" key="search">
@@ -132,19 +191,6 @@ export default function SearchPage() {
       <p className="section-desc">
         Search any dish and compare prices, ratings, and distance across restaurants near you.
       </p>
-
-      <div className="search-box">
-        <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input
-          type="text"
-          placeholder='Try "momos", "biryani", "maggi"...'
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
-      </div>
 
       <div className="maps-cta-card">
         <div>
@@ -155,64 +201,164 @@ export default function SearchPage() {
         </div>
         <button
           className="maps-location-btn"
-          onClick={fetchNearbyByLocation}
-          disabled={mapLoading}
+          onClick={() => requestLocationAndRefresh()}
+          disabled={locating || loadingContext}
+          type="button"
         >
-          {mapLoading ? 'Locating...' : 'Use My Location'}
+          {locating ? 'Locating...' : hasLocation ? 'Refresh Nearby' : 'Use My Location'}
         </button>
       </div>
 
-      {mapError && <div className="auth-error">{mapError}</div>}
+      {locationError && <div className="auth-error">{locationError}</div>}
 
-      {nearbyPlaces.length > 0 && (
+      {hasLocation && (
         <>
           <div className="section-label">Nearby via Google Maps</div>
-          <div className="maps-list">
-            {nearbyPlaces.map((place) => (
-              <div className="maps-card" key={place.id}>
-                <div className="maps-card-top">
-                  <h3>{place.name}</h3>
-                  {place.rating ? (
-                    <span className="maps-rating">{place.rating} / 5</span>
-                  ) : (
-                    <span className="maps-rating muted">No ratings</span>
-                  )}
-                </div>
-                <p className="maps-address">{place.address}</p>
-                <div className="maps-meta-row">
-                  <span>{place.totalRatings} reviews</span>
-                  <span>
-                    {place.openNow === null
-                      ? 'Hours unavailable'
-                      : place.openNow
-                        ? 'Open now'
-                        : 'Closed now'}
-                  </span>
-                </div>
-                <a
-                  className="maps-open-link"
-                  href={place.mapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open in Google Maps
-                </a>
+          <div className="review-form-card search-restaurant-panel">
+            <div className="auth-field">
+              <label htmlFor="restaurantSearchInput">Restaurant Search</label>
+              <div className="search-box search-box-compact search-box-infield">
+                <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  id="restaurantSearchInput"
+                  type="text"
+                  placeholder='Try "dominos", "campus", "canteen"...'
+                  value={restaurantSearchTerm}
+                  onChange={(event) => setRestaurantSearchTerm(event.target.value)}
+                />
               </div>
-            ))}
+            </div>
+
+            <div className="restaurant-filters-grid">
+              <div className="auth-field">
+                <label htmlFor="distanceFilter">Distance</label>
+                <select
+                  id="distanceFilter"
+                  value={distanceFilter}
+                  onChange={(event) => setDistanceFilter(event.target.value)}
+                >
+                  {DISTANCE_FILTERS.map((filter) => (
+                    <option key={filter.id} value={filter.id}>{filter.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="auth-field">
+                <label htmlFor="ratingFilter">Rating</label>
+                <select
+                  id="ratingFilter"
+                  value={ratingFilter}
+                  onChange={(event) => setRatingFilter(event.target.value)}
+                >
+                  {RATING_FILTERS.map((filter) => (
+                    <option key={filter.id} value={filter.id}>{filter.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="auth-field">
+                <label htmlFor="openFilter">Status</label>
+                <select
+                  id="openFilter"
+                  value={openFilter}
+                  onChange={(event) => setOpenFilter(event.target.value)}
+                >
+                  <option value="all">Open + Closed</option>
+                  <option value="open">Open now</option>
+                  <option value="closed">Closed now</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="restaurant-list-summary">
+              <span>{visibleRestaurants.length} of {filteredRestaurants.length} restaurants shown</span>
+              {hasRestaurantFilters && (
+                <button className="review-action-btn" type="button" onClick={clearRestaurantFilters}>
+                  Clear Filters
+                </button>
+              )}
+            </div>
+
+            {filteredRestaurants.length === 0 ? (
+              <div>No nearby restaurants match your filters.</div>
+            ) : (
+              <>
+                <div className="maps-list">
+                  {visibleRestaurants.map((restaurant, index) => (
+                    <div className="maps-card" key={restaurant._id || restaurant.googlePlaceId || index}>
+                      <div className="maps-card-top">
+                        <h3>{restaurant.name}</h3>
+                        {Number.isFinite(Number(restaurant.rating)) ? (
+                          <span className="maps-rating">{Number(restaurant.rating).toFixed(1)} / 5</span>
+                        ) : (
+                          <span className="maps-rating muted">No ratings</span>
+                        )}
+                      </div>
+                      <p className="maps-address">{restaurant.address || 'Address unavailable'}</p>
+                      <div className="maps-meta-row">
+                        <span>{restaurant.totalRatings || 0} reviews</span>
+                        <span>{restaurant.distance || '\u2014'}</span>
+                        <span>{formatOpenStatus(restaurant.openNow)}</span>
+                      </div>
+                      {restaurant.mapsUrl && (
+                        <a
+                          className="maps-open-link"
+                          href={restaurant.mapsUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open in Google Maps
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {hasMoreRestaurants && (
+                  <button
+                    className="show-more-btn"
+                    type="button"
+                    onClick={() => setVisibleRestaurantCount((count) => count + RESTAURANTS_PAGE_SIZE)}
+                  >
+                    Show More Restaurants
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </>
       )}
 
       <div className="filter-row">
-        {filters.map(f => (
+        {filters.map((filter) => (
           <button
-            key={f.id}
-            className={'filter-chip' + (activeFilter === f.id ? ' active' : '')}
-            onClick={() => setActiveFilter(f.id)}
+            key={filter.id}
+            className={'filter-chip' + (activeFilter === filter.id ? ' active' : '')}
+            onClick={() => setActiveFilter(filter.id)}
           >
-            {f.label}
+            {filter.label}
           </button>
         ))}
+      </div>
+
+      <div className="auth-field dish-search-field">
+        <label htmlFor="dishSearchInput">Dish Search</label>
+        <div className="search-box search-box-compact search-box-infield">
+          <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            id="dishSearchInput"
+            type="text"
+            placeholder='Try "momos", "biryani", "maggi"...'
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
       </div>
 
       <div className="section-label">
@@ -221,34 +367,36 @@ export default function SearchPage() {
       <div className="result-list">
         {filteredResults.length === 0 ? (
           <div>
-            {searchTerm.trim()
-              ? 'No dishes matched your search.'
-              : 'No results found.'}
+            {!hasLocation
+              ? 'Use My Location to see dishes available near your campus.'
+              : searchTerm.trim()
+                ? 'No nearby dishes matched your search.'
+                : 'No dishes available in nearby mapped restaurants right now.'}
           </div>
         ) : (
-          filteredResults.map((r, i) => (
-            <div className="result-card" key={r._id || i}>
+          filteredResults.map((result, index) => (
+            <div className="result-card" key={result._id || index}>
               <div className="result-top">
                 <div>
-                  <div className="result-name">{r.name}</div>
-                  <div className="result-dish">{r.dish}</div>
+                  <div className="result-name">{result.name}</div>
+                  <div className="result-dish">{result.dish}</div>
                 </div>
-                <div className="result-price">{r.price}</div>
+                <div className="result-price">{result.price}</div>
               </div>
               <div className="result-bottom">
                 <span className="result-meta">
-                  <span className="star">{'\u2605'}</span> {r.rating} ({r.reviews})
+                  <span className="star">{'\u2605'}</span> {result.rating} ({result.reviews})
                 </span>
-                <span className="result-meta">{r.distance}</span>
+                <span className="result-meta">{result.distance}</span>
               </div>
-              {r.offer && <div className="offer-badge">{r.offer}</div>}
+              {result.offer && <div className="offer-badge">{result.offer}</div>}
             </div>
           ))
         )}
       </div>
 
       <div style={{ marginTop: '20px' }}>
-        <span className="wip-badge">More filters coming soon</span>
+        <span className="wip-badge">More dish filters coming soon</span>
       </div>
     </div>
   )

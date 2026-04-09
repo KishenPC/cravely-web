@@ -72,7 +72,7 @@ export default function Navigation({ children }) {
       {children}
 
       <footer className="menu-footer">
-        <p>CRAVELY &middot; A College Project &middot; Work in Progress</p>
+        <p>CRAVELY &middot; A College Project &middot;</p>
       </footer>
     </main>
   )
