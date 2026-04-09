@@ -173,8 +173,3 @@ npm run seed:more
 - `Offer`: redeemable campaign with points cost and claim counters.
 - `Reward`: points-based reward catalog.
 - `Redemption`: audit trail for reward/offer redemptions.
-
-## Notes
-
-- Helpful upvote action in UI is currently local-only unless wired to a backend endpoint.
-- Offer geo-fencing controls are partially implemented in UI and can be extended.
